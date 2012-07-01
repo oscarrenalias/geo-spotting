@@ -1,5 +1,3 @@
-
-
 import play.api.Application
 import com.mongodb.casbah.Imports._
 
@@ -14,5 +12,3 @@ package object helpers {
 
 	implicit def Application2ExtApplication(a:Application) = new ExtApplication(a)
 }
-
-
