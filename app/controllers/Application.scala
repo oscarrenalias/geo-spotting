@@ -12,7 +12,7 @@ object Application extends Controller {
 
   	Logger.debug(current.mongo.toString)
 
-    Ok(views.html.index("Your new application is ready."))
+    Ok(views.html.index())
   }
   
 }
