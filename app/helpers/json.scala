@@ -30,5 +30,10 @@ package object json {
   case class JsonError(override val message:String) extends JsonResponse(true, message)
   object JsonError {
     implicit object JsonError extends JsonResponseWriter[JsonError]
-  }  
+  }
+
+  case class JsonSuccess(override val message:String) extends JsonResponse(false, message)
+  object JsonSuccess {
+    implicit object JsonSuccess extends JsonResponseWriter[JsonError]
+  }
 }

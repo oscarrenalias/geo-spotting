@@ -6,35 +6,22 @@ import play.api.libs.concurrent.{Akka, Promise}
 import play.api.Play.current
 import play.api.libs.json.{Writes, Json, JsString}
 import helpers.json._
+import helpers._
+import models.Sighting
 
-trait AsyncJsonService extends Controller {
-	def WithFuture[T](timeoutSeconds:Int)(f: => T)(implicit jsonHelper:Writes[T]) = {
-	    Akka.future {
-	      f
-	    } orTimeout(Ok(Json.toJson(JsonError("Timeout while reading data"))), timeoutSeconds, java.util.concurrent.TimeUnit.SECONDS) map { result =>
-	      result.fold(
-	        data => Ok(Json.toJson(data)),
-	        error => Ok(Json.toJson(JsonError("Error")))
-	      )
-	    }
-	  }	
-
-	def AsyncAction[T](timeoutSeconds:Int)(f: => T)(implicit jsonHelper:Writes[T]) = Action {
-		Async {
-			WithFuture(timeoutSeconds) {
-				f
-			}
-		}
-	}	
-}
-
-trait Configuration {
-	lazy val serviceDefaultTimeoutSeconds = 2
-}
-
-object Services extends Controller with AsyncJsonService with Configuration {
-	def report = AsyncAction(serviceDefaultTimeoutSeconds) {
-		JsonError("Not implemented yet")
+object Services extends Controller with AsyncJsonService with helpers.Configuration {
+	def report(latlng:String) = AsyncAction(serviceDefaultTimeoutSeconds) {
+    try {
+      val coords = latlng.split(",").map(_.toDouble)
+      if(coords.size == 2) {
+        Sighting.put(Sighting(coords(0), coords(1)))
+        JsonSuccess("Sighting added")
+      } else {
+        JsonError("Input value not correct")
+      }
+    } catch {
+      case e:Exception => JsonError("Input value not correct")
+    }
 	}
 
 	def nearby = AsyncAction(serviceDefaultTimeoutSeconds) {

@@ -9,6 +9,6 @@ GET     /                           controllers.Application.index
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
 # REST services
-GET		/services/report						controllers.Services.report
+POST		/services/report/*latlng						controllers.Services.report(latlng:String)
 GET		/services/nearby						controllers.Services.nearby
 GET		/services/area						controllers.Services.area

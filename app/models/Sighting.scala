@@ -3,7 +3,7 @@ import com.mongodb.casbah.Imports._
 import org.joda.time.DateTime
 import helpers.{Record, Mapper}
 
-case class Sighting(lat: Double, lng: Double, timestamp:DateTime, id:Option[String] = None)
+case class Sighting(lat: Double, lng: Double, timestamp:DateTime = new DateTime, id:Option[String] = None)
 
 object Sighting extends Record[Sighting] {
   val collection = "sighting"
