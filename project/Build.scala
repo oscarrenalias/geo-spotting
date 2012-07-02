@@ -9,7 +9,8 @@ object ApplicationBuild extends Build {
 
     val appDependencies = Seq(
       // Add your project dependencies here,
-      "org.mongodb" %% "casbah" % "2.4.0"
+      "org.mongodb" %% "casbah" % "2.4.0",
+      "joda-time" % "joda-time" % "2.1"
     )
 
     val main = PlayProject(appName, appVersion, appDependencies, mainLang = SCALA).settings(
