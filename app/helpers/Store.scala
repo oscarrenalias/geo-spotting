@@ -1,7 +1,8 @@
-  package helpers
+package helpers
 
 import com.mongodb.casbah.Imports._
 import helpers.Store._
+import play.api.Logger
 
 object Store {
 	import play.api.Play.current
@@ -27,6 +28,18 @@ trait Record[T] {
   def get[T](id:String)(implicit mapper:Mapper[T]): Option[T] = withStore { conn =>
     val q = MongoDBObject( "_id" -> id)
     conn(collection).findOne(q).flatMap(obj => mapper.read(obj))
+  }
+
+  def query[T](query:DBObject)(implicit mapper:Mapper[T]): Seq[T] = withStore { conn =>
+    var result = scala.collection.mutable.Seq[T]()
+    for(obj <- conn(collection).find(query)) {
+      mapper.read(obj) match {
+        case Some(x) => result = result :+ x; x   // TODO: not very functional
+        case _ => {}
+      }
+    }
+
+    result
   }
 }
 

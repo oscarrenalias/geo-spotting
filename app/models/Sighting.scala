@@ -13,8 +13,8 @@ object Sighting extends Record[Sighting] {
       lat <- o.getAs[Double]("lat")
       lng <- o.getAs[Double]("lng")
       timestamp <- o.getAs[Long]("timestamp").flatMap(instant=>Some(new DateTime(instant)))
-      id <- o.getAs[String]("_id")
-    } yield(Sighting(lat, lng, timestamp, Some(id)))
+      id <- o.get("_id")
+    } yield(Sighting(lat, lng, timestamp, Some(id.toString)))
 
     def write(t:Sighting) = MongoDBObject(
       "lat" -> t.lat, "lng" -> t.lng, "timestamp" -> t.timestamp.toInstant.getMillis

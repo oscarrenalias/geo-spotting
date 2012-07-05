@@ -13,7 +13,7 @@ trait AsyncJsonService extends Controller {
     } orTimeout(Ok(Json.toJson(JsonError("Timeout while reading data"))), timeoutSeconds, java.util.concurrent.TimeUnit.SECONDS) map { result =>
       result.fold(
         data => Ok(Json.toJson(data)),
-        error => Ok(Json.toJson(JsonError("Error")))
+        error => Ok(Json.toJson(JsonError("Error while waiting for future:" + error)))
       )
     }
   }

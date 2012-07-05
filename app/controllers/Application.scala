@@ -8,11 +8,6 @@ import helpers._
 object Application extends Controller {
   
   def index = Action {
-  	import play.api.Play.current
-
-  	Logger.debug(current.mongo.toString)
-
     Ok(views.html.index())
   }
-  
 }
