@@ -1,8 +1,14 @@
 (function() {
 
 	app = {
+	    // Google Maps API object
 		map: null,
+
+		// center
 		marker: null,
+
+		// array of markers currently displayed
+		sightings: Array(),
 
 		init: function() {
 	    	geo.current(function(loc) {
@@ -23,7 +29,7 @@
 		    	});
 
 		    	// set up the events
-		    	google.maps.event.addListener(app.map, 'bounds_changed', app.controller.boundingBoxChanged);
+		    	google.maps.event.addListener(app.map, 'idle', app.controller.boundingBoxChanged);
 
 		    	// enable buttons
 		    	$('#button-report').button().click(app.controller.reportClicked);
@@ -31,9 +37,46 @@
 		},
 
 		controller: {
+		    addMarker: function(lat, lng) {
+                return(new google.maps.Marker({
+                    position: new google.maps.LatLng(lat, lng),
+                    map: app.map
+                }));
+		    },
+
+		    deleteMarker: function(marker) {
+		        marker.setMap(null);
+		    },
+
+		    deleteAllMarkers: function() {
+                for(i in app.sightings) {
+                    app.controller.deleteMarker(app.sightings[i]);
+                }
+		    },
+
 		    boundingBoxChanged: function() {
                 // place the marker in the center
 		    	app.marker.setPosition(app.map.getCenter());
+		    	// and refresh the list of markers
+		    	var ne = app.map.getBounds().getNorthEast();
+		    	var sw = app.map.getBounds().getSouthWest();
+		    	$.ajax({
+		    	    url: "/services/area?lat1=" + ne.lat() + "&lng1=" + ne.lng() + "&lat2=" + sw.lat() + "&lng2=" + sw.lng(),
+		    	    type: "GET",
+		    	    success: function(response) {
+		    	        console.log("New markers received: " + response.data.length);
+		    	        // delete the previous markers
+		    	        app.controller.deleteAllMarkers();
+
+                        // add the new markings
+                        for(i in response.data) {
+                            app.sightings.push(app.controller.addMarker(response.data[i].lat, response.data[i].lng));
+                        }
+		    	    },
+		    	    error: function() {
+		    	        console.log("Error loading marker data")
+		    	    }
+		    	})
 		    },
 
 		    reportClicked: function() {

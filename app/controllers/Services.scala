@@ -4,7 +4,7 @@ import play.api._
 import play.api.mvc._
 import play.api.libs.concurrent.{Akka, Promise}
 import play.api.Play.current
-import play.api.libs.json.{Writes, Json, JsString}
+import libs.json._
 import helpers.json._
 import helpers._
 import models.Sighting
@@ -50,8 +50,9 @@ object Services extends Controller with AsyncJsonService with helpers.Configurat
           Logger.debug("Query: nw=" + lat1 + "," + lng1 + " se=" + lat2 + "," + lng2)
           val q = ("lat" $gte lat2 $lte lat1) ++ ("lng" $gte lng2 $lte lng1) ++
                   ("timestamp" $gt twoMonthsAgo.toInstant.getMillis)
-          JsonSuccess(Sighting.query(q).toString)
-        }).getOrElse(JsonError("Incorrect parameters"))
+
+          JsObject(List("error" -> false, "data" -> JsArray(Sighting.query(q).map(Json.toJson(_)))))
+        }).getOrElse(JsObject(List("error" -> false, "data" -> JsArray(List()))))
       }
     }
   }

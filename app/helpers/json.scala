@@ -3,11 +3,14 @@ package helpers
 import play.api.libs.json._
 import java.text.SimpleDateFormat
 import java.util.Date
+import org.specs2.internal.scalaz.Writers
 
 package object json {
   implicit def String2JsString(x:String) = JsString(x)
+  implicit def Double2JsNumber(d:Double)= JsNumber(d)
   implicit def Long2JsNumber(l:Long) = JsNumber(l)
   implicit def Int2JsNumber(i:Int) = JsNumber(i)
+  implicit def Boolean2JsBoolean(x:Boolean) = JsBoolean(x)
   implicit def Date2JsString(d:Date) = {
     JsString((new SimpleDateFormat("dd-MM-yyyy hh:mm:ss")).format(d))
   }  
