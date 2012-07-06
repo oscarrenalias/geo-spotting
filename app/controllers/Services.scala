@@ -13,19 +13,16 @@ import org.joda.time.DateTime
 
 object Services extends Controller with AsyncJsonService with helpers.Configuration {
 	def report(latlng:String) = AsyncAction(serviceDefaultTimeoutSeconds) {
-    try {
-      val coords = latlng.split(",").map(_.toDouble)
-      if(coords.size == 2) {
-        Sighting.put(Sighting(coords(0), coords(1))).fold(
-          success => JsonSuccess("Sighting added"),
-          failure => JsonError("There was an error adding the sighting: " + failure.toString)
-        )
-      } else {
-        JsonError("Input value not correct")
-      }
-    } catch {
-      case e:Exception => JsonError("Input value not correct")
+
+    def coords = latlng.split(",").map(_.toDouble) match {
+      case x if x.size == 2 => Some(x(0), x(1))
+      case _ => None
     }
+
+    coords.map(c => Sighting.put(Sighting(c._1, c._2)).fold(
+      success => JsonSuccess("Sighting added"),
+      failure => JsonError("There was an error adding the sighting: " + failure.toString)
+    )).getOrElse(JsonError("Input value not correct"))
 	}
 
 	def nearby = AsyncAction(serviceDefaultTimeoutSeconds) {
@@ -48,10 +45,9 @@ object Services extends Controller with AsyncJsonService with helpers.Configurat
           lng2 <- params.get("lng2")
         } yield {
           import models.Sighting._
-          var twoMonthsAgo = (new DateTime).minusMonths(2)
-          Logger.debug("Query: nw=" + lat1 + "," + lng1 + " se=" + lat2 + "," + lng2)
+          Logger.trace("Query: nw=" + lat1 + "," + lng1 + " se=" + lat2 + "," + lng2)
           val q = ("lat" $gte lat2 $lte lat1) ++ ("lng" $gte lng2 $lte lng1) ++
-                  ("timestamp" $gt twoMonthsAgo.toInstant.getMillis)
+                  ("timestamp" $gt (new DateTime).minusMonths(2).toInstant.getMillis)
 
           JsObject(List("error" -> false, "data" -> JsArray(Sighting.query(q).map(Json.toJson(_)))))
         }).getOrElse(JsObject(List("error" -> false, "data" -> JsArray(List()))))
