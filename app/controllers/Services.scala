@@ -16,8 +16,10 @@ object Services extends Controller with AsyncJsonService with helpers.Configurat
     try {
       val coords = latlng.split(",").map(_.toDouble)
       if(coords.size == 2) {
-        Sighting.put(Sighting(coords(0), coords(1)))
-        JsonSuccess("Sighting added")
+        Sighting.put(Sighting(coords(0), coords(1))).fold(
+          success => JsonSuccess("Sighting added"),
+          failure => JsonError("There was an error adding the sighting: " + failure.toString)
+        )
       } else {
         JsonError("Input value not correct")
       }
