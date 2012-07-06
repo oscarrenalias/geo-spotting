@@ -16,8 +16,9 @@ object Sighting extends Record[Sighting] {
       id <- o.get("_id")
     } yield(Sighting(lat, lng, timestamp, Some(id.toString)))
 
-    def write(t:Sighting) = MongoDBObject(
-      "lat" -> t.lat, "lng" -> t.lng, "timestamp" -> t.timestamp.toInstant.getMillis
-    )
+    def write(t:Sighting) = t.id match {
+      case None => MongoDBObject("lat" -> t.lat, "lng" -> t.lng, "timestamp" -> t.timestamp.toInstant.getMillis)
+      case Some(id) => MongoDBObject("lat" -> t.lat, "lng" -> t.lng, "timestamp" -> t.timestamp.toInstant.getMillis, "_id" -> id)
+    }
   }
 }

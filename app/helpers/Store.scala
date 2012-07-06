@@ -20,9 +20,14 @@ trait Record[T] {
   // mongo collection to which  this entity belongs - must be provided by classes mixing in this trait
   val collection: String
 
-  // load a record from the database
-  def put(t: T)(implicit mapper:Mapper[T]) = withStore { conn =>
-    conn(collection).insert(mapper.write(t))
+  type RecordException = Exception
+
+  // insert a record to the database
+  def put(t: T)(implicit mapper:Mapper[T]):Either[T,RecordException] = withStore { conn =>
+    conn(collection).insert(mapper.write(t)) match {
+      case x if x.getError == null => Left(t)
+      case x => Right(new Exception(x.getError))
+    }
   }
 
   def get[T](id:String)(implicit mapper:Mapper[T]): Option[T] = withStore { conn =>

@@ -50,6 +50,7 @@ object Services extends Controller with AsyncJsonService with helpers.Configurat
           Logger.debug("Query: nw=" + lat1 + "," + lng1 + " se=" + lat2 + "," + lng2)
           val q = ("lat" $gte lat2 $lte lat1) ++ ("lng" $gte lng2 $lte lng1) ++
                   ("timestamp" $gt twoMonthsAgo.toInstant.getMillis)
+          JsonSuccess(Sighting.query(q).toString)
         }).getOrElse(JsonError("Incorrect parameters"))
       }
     }
