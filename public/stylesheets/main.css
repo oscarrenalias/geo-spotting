@@ -4,11 +4,12 @@
 }
 
 #map {
-	height: 90%;
+	height: 100%;
 	width: 100%;
 }
 
 #actions {
-	height:10%;
-	width:100%;
+	position:relative;
+    top: -50px;
+    left: 50px;
 }

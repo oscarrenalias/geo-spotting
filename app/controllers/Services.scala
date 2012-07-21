@@ -25,14 +25,6 @@ object Services extends Controller with AsyncJsonService with helpers.Configurat
     )).getOrElse(JsonError("Input value not correct"))
 	}
 
-	def nearby = AsyncAction(serviceDefaultTimeoutSeconds) {
-		JsonError("Not implemented yet")
-	}
-
-	/*def area = AsyncAction(serviceDefaultTimeoutSeconds) {
-		JsonError("Not implemented yet")
-	}*/
-
   def area =  Action { request =>
     Async {
       WithFuture(serviceDefaultTimeoutSeconds) {

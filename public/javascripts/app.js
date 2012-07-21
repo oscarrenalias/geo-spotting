@@ -37,21 +37,36 @@
 		},
 
 		controller: {
-		    addMarker: function(lat, lng) {
-                return(new google.maps.Marker({
+		    addMarker: function(lat, lng, text) {
+                var marker = new google.maps.Marker({
                     position: new google.maps.LatLng(lat, lng),
-                    map: app.map
-                }));
-		    },
+                    map: app.map,
+                    animation: google.maps.Animation.DROP
+                });
 
-		    deleteMarker: function(marker) {
-		        marker.setMap(null);
+                // info window, if text provided
+                if(text != null) {
+                    var infoWindow = new google.maps.InfoWindow({
+                        content: text
+                    });
+
+                    google.maps.event.addListener(marker, 'click', function() {
+                        infoWindow.open(app.map, marker);
+                    });
+                }
+
+                app.sightings[lat + "-" + lng] = marker;
+                return(marker);
 		    },
 
 		    deleteAllMarkers: function() {
                 for(i in app.sightings) {
-                    app.controller.deleteMarker(app.sightings[i]);
+                    app.sightings[i].setMap(null);
                 }
+		    },
+
+		    markerExists: function(lat, lng) {
+		        return(app.sightings[lat + "-" + lng] != null);
 		    },
 
 		    boundingBoxChanged: function() {
@@ -65,12 +80,15 @@
 		    	    type: "GET",
 		    	    success: function(response) {
 		    	        console.log("New markers received: " + response.data.length);
-		    	        // delete the previous markers
-		    	        app.controller.deleteAllMarkers();
 
-                        // add the new markings
+                        // add the new markings if they don't exist yet
                         for(i in response.data) {
-                            app.sightings.push(app.controller.addMarker(response.data[i].lat, response.data[i].lng));
+                            if(!app.controller.markerExists(response.data[i].lat, response.data[i].lng))
+                                app.controller.addMarker(
+                                    response.data[i].lat,
+                                    response.data[i].lng,
+                                    "Created on: " + response.data[i].timestamp.unix
+                                );
                         }
 		    	    },
 		    	    error: function() {
