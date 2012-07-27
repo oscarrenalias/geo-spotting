@@ -1,22 +1,31 @@
 package helpers
 
 import com.mongodb.casbah.Imports._
-import helpers.Store._
 import play.api.Logger
+import com.mongodb.casbah.{MongoDB, MongoURI}
 
 object Store {
 	import play.api.Play.current
 
-	lazy val mongo = (for {
-		host <- current.configuration.getString("mongodb.host")
-		port <- current.configuration.getInt("mongodb.port")
-		database <- current.configuration.getString("mongodb.database")
-	} yield(MongoConnection(host, port))(database)).getOrElse(throw(current.configuration.globalError("Fatal error: cannot connect to data store")))
+  def storeError(e:Option[Throwable] = None) = current.configuration.globalError("Error connecting to MongoDB. Make sure mongodb.url is correctly defined in application.properties.", e)
 
-	def withStore[T](f: => MongoDB => T) = { f(mongo) }
+  lazy val mongo = {
+    val mongoURI = MongoURI(
+      scala.util.Properties.envOrElse("MONGOHQ_URL",
+        current.configuration.getString("mongodb.url").getOrElse({throw storeError();""})
+    ))
+    mongoURI.connectDB.fold(
+      error => { throw storeError(Some(error)); /* dummy mongo DB */ MongoDB(MongoConnection(""), "") },
+      db => { db.authenticate(mongoURI.username.getOrElse(""), mongoURI.password.getOrElse("").toString); db }
+    )
+  }
+
+  def withStore[T](f: => MongoDB => T) = { f(mongo) }
 }
 
 trait Record[T] {
+  import helpers.Store._
+
   // mongo collection to which  this entity belongs - must be provided by classes mixing in this trait
   val collection: String
 
