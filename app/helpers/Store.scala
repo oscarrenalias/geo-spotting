@@ -7,16 +7,16 @@ import com.mongodb.casbah.{MongoDB, MongoURI}
 object Store {
 	import play.api.Play.current
 
-  def storeError(e:Option[Throwable] = None) = current.configuration.globalError("Error connecting to MongoDB. Make sure mongodb.url is correctly defined in application.properties.", e)
+  protected def storeError(e:Option[Throwable] = None) = current.configuration.globalError("Error connecting to MongoDB. Make sure mongodb.url is correctly defined in application.properties.", e)
+
+  lazy val mongoURI = scala.util.Properties.envOrElse("MONGOHQ_URL",
+      current.configuration.getString("mongodb.url").getOrElse({throw storeError();""}))
 
   lazy val mongo = {
-    val mongoURI = MongoURI(
-      scala.util.Properties.envOrElse("MONGOHQ_URL",
-        current.configuration.getString("mongodb.url").getOrElse({throw storeError();""})
-    ))
-    mongoURI.connectDB.fold(
+    val uri = MongoURI(mongoURI)
+    uri.connectDB.fold(
       error => { throw storeError(Some(error)); /* dummy mongo DB */ MongoDB(MongoConnection(""), "") },
-      db => { db.authenticate(mongoURI.username.getOrElse(""), mongoURI.password.getOrElse("").toString); db }
+      db => { db.authenticate(uri.username.getOrElse(""), uri.password.getOrElse("").toString); db }
     )
   }
 
