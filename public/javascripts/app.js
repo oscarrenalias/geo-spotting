@@ -69,6 +69,28 @@
 		        return(app.sightings[lat + "-" + lng] != null);
 		    },
 
+		    showError: function(msg, duration) {
+                if(duration == null)
+                    duration = 3
+                showNotification({
+                    type: "error",
+                    message: msg,
+                    autoClose: true,
+                    duration: duration
+                });
+		    },
+
+            showSuccess: function(msg, duration) {
+                if(duration == null)
+                    duration = 3
+                showNotification({
+                    type: "success",
+                    message: msg,
+                    autoClose: true,
+                    duration: duration
+                });
+		    },
+
 		    boundingBoxChanged: function() {
                 // place the marker in the center
 		    	app.marker.setPosition(app.map.getCenter());
@@ -104,7 +126,13 @@
                     type: "POST",
                     success: function(data) {
                         console.log(data);
-                        window.alert("Done");
+                        if(data.error)
+                            app.controller.showError("There was an error adding the sighting: " + data.message);
+                        else
+                            app.controller.showSuccess("Sighting added successfully");
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        app.controller.showError("There was an error adding the sighting:" + textStatus)
                     }
 		        });
 		    }
