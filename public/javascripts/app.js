@@ -101,20 +101,26 @@
 		    	    url: "/services/area?lat1=" + ne.lat() + "&lng1=" + ne.lng() + "&lat2=" + sw.lat() + "&lng2=" + sw.lng(),
 		    	    type: "GET",
 		    	    success: function(response) {
-		    	        console.log("New markers received: " + response.data.length);
+		    	        if(reponse.error) {
+		    	            app.controller.showError("There was an error retrieving the markers: " + response.message)
+		    	        }
+		    	        else {
+                            console.log("New markers received: " + response.data.length);
 
-                        // add the new markings if they don't exist yet
-                        for(i in response.data) {
-                            if(!app.controller.markerExists(response.data[i].lat, response.data[i].lng))
-                                app.controller.addMarker(
-                                    response.data[i].lat,
-                                    response.data[i].lng,
-                                    "Created on: " + response.data[i].timestamp.unix
-                                );
-                        }
+                            // add the new markings if they don't exist yet
+                            for(i in response.data) {
+                                if(!app.controller.markerExists(response.data[i].lat, response.data[i].lng))
+                                    app.controller.addMarker(
+                                        response.data[i].lat,
+                                        response.data[i].lng,
+                                        "Created on: " + response.data[i].timestamp.unix
+                                    );
+                            }
+		    	        }
 		    	    },
-		    	    error: function() {
-		    	        console.log("Error loading marker data")
+		    	    error: function(jXHR, textStatus, errorThrown) {
+		    	        console.log("Error:" + textStatut + ", errorThrown:" + errorThrown);
+		    	        app.controller.showError("There was an error retrieving the markers: " + textStatus)
 		    	    }
 		    	})
 		    },
@@ -132,7 +138,7 @@
                             app.controller.showSuccess("Sighting added successfully");
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
-                        app.controller.showError("There was an error adding the sighting:" + textStatus)
+                        app.controller.showError("There was an error adding the sighting: " + textStatus)
                     }
 		        });
 		    }
