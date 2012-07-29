@@ -21,7 +21,7 @@ object Services extends Controller with AsyncJsonService with helpers.Configurat
 
     coords.map(c => Sighting.put(Sighting(c._1, c._2)).fold(
       success => JsonSuccess("Sighting added"),
-      failure => JsonError("There was an error adding the sighting: " + failure.toString)
+      failure => JsonError(failure.toString)
     )).getOrElse(JsonError("Input value not correct"))
 	}
 
