@@ -17,8 +17,12 @@ object Store {
     uri.connectDB.fold(
       error => { throw storeError(Some(error)); /* dummy mongo DB */ MongoDB(MongoConnection(""), "") },
       db => {
-	      Logger.debug("Mongo user = " + uri.username.getOrElse("") + ", password = " + uri.password.getOrElse(Array()).mkString(""))
-	      db.authenticate(uri.username.getOrElse(""), uri.password.getOrElse("").toString); db }
+	      val username = uri.username.getOrElse("")
+	      val password = uri.password.getOrElse(Array()).mkString("")
+	      Logger.debug("Mongo user = " + username + ", password = " + password)
+	      db.authenticate(username, password);
+	      db
+      }
     )
   }
 
