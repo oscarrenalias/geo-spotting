@@ -101,7 +101,7 @@
 		    	    url: "/services/area?lat1=" + ne.lat() + "&lng1=" + ne.lng() + "&lat2=" + sw.lat() + "&lng2=" + sw.lng(),
 		    	    type: "GET",
 		    	    success: function(response) {
-		    	        if(reponse.error) {
+		    	        if(response.error) {
 		    	            app.controller.showError("There was an error retrieving the markers: " + response.message)
 		    	        }
 		    	        else {
